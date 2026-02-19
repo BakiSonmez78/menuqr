@@ -367,11 +367,9 @@ function renderMenuPage(
       </main>
 
       <!-- Cart Floating Button -->
-      ${hasOrdering ? `
         <div class="menu-cart-fab" id="cart-fab" style="display: none; background: ${themeColor};">
           🛒 <span id="cart-count">0</span> ${currentLang === 'tr' ? 'ürün' : 'items'} - <span id="cart-total">₺0.00</span>
         </div>
-      ` : ''}
 
       <!-- Hesap / Ödeme Button - shown after ordering -->
       <button class="request-bill-fab" id="request-bill-fab" style="display: none; --bill-color: ${themeColor};">
@@ -410,7 +408,7 @@ function renderMenuPage(
       </footer>
 
       <!-- Cart Drawer (hidden) -->
-      ${hasOrdering ? renderCartDrawer(restaurant, themeColor) : ''}
+      ${renderCartDrawer(restaurant, themeColor)}
     </div>
   `;
 
@@ -491,22 +489,20 @@ function renderMenuPage(
   });
 
   // Add to cart buttons
-  if (hasOrdering) {
-    document.querySelectorAll('.menu-add-to-cart').forEach(btn => {
-      btn.addEventListener('click', (e) => {
-        e.stopPropagation();
-        const itemId = (btn as HTMLElement).dataset.itemId!;
-        const item = availableItems.find(i => i.id === itemId);
-        if (!item) return;
-        addToCart(item, restaurant);
-      });
+  document.querySelectorAll('.menu-add-to-cart').forEach(btn => {
+    btn.addEventListener('click', (e) => {
+      e.stopPropagation();
+      const itemId = (btn as HTMLElement).dataset.itemId!;
+      const item = availableItems.find(i => i.id === itemId);
+      if (!item) return;
+      addToCart(item, restaurant);
     });
+  });
 
-    // Cart FAB
-    document.getElementById('cart-fab')?.addEventListener('click', () => {
-      document.getElementById('cart-drawer')?.classList.add('open');
-    });
-  }
+  // Cart FAB
+  document.getElementById('cart-fab')?.addEventListener('click', () => {
+    document.getElementById('cart-drawer')?.classList.add('open');
+  });
 
   // Item detail modal
   document.querySelectorAll('.menu-item').forEach(el => {
@@ -518,9 +514,7 @@ function renderMenuPage(
   });
 
   // Cart drawer events
-  if (hasOrdering) {
-    bindCartDrawerEvents(restaurant);
-  }
+  bindCartDrawerEvents(restaurant);
 
   // ============================================
   // AI Chat Assistant (with feedback awareness)
@@ -673,11 +667,9 @@ function renderMenuItem(item: MenuItem, restaurant: Restaurant, themeColor: stri
           ${item.preparationTime ? `<span class="menu-item-prep-time">⏱️ ${item.preparationTime} dk</span>` : ''}
         </div>
       </div>
-      ${hasOrdering ? `
-        <button class="menu-add-to-cart" data-item-id="${item.id}" style="background: ${themeColor};" title="Sepete Ekle">
+      <button class="menu-add-to-cart" data-item-id="${item.id}" style="background: ${themeColor};" title="Sepete Ekle">
           +
         </button>
-      ` : ''}
     </div>
   `;
 }
@@ -733,8 +725,7 @@ function showItemDetail(item: MenuItem, restaurant: Restaurant, themeColor: stri
           ${item.preparationTime ? `<span class="menu-detail-info-item">⏱️ ${item.preparationTime} ${currentLang === 'tr' ? 'dakika' : 'min'}</span>` : ''}
         </div>
 
-        ${hasOrdering ? `
-          <div class="menu-detail-order-area">
+        <div class="menu-detail-order-area">
             <div class="menu-detail-qty">
               <button class="menu-detail-qty-btn" id="detail-qty-minus">−</button>
               <span id="detail-qty-value">1</span>
@@ -744,7 +735,6 @@ function showItemDetail(item: MenuItem, restaurant: Restaurant, themeColor: stri
               ${currentLang === 'tr' ? 'Sepete Ekle' : 'Add to Cart'} - ${restaurant.currency}${effectivePrice.toFixed(2)}
             </button>
           </div>
-        ` : ''}
       </div>
     </div>
   `;
