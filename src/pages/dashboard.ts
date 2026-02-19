@@ -101,6 +101,10 @@ export async function renderDashboard(app: HTMLElement): Promise<void> {
                       <button class="btn btn-ghost btn-sm preview-btn" data-slug="${r.slug}">
                         👁️ Önizle
                       </button>
+                      <button class="btn btn-sm delete-restaurant-btn" data-id="${r.id}" data-name="${r.name}" style="background: #ef4444; color: white; border: none;">
+                        🗑️ Sil
+                      </button>
+                    </div>
                     </div>
                   </div>
                 </div>
@@ -145,6 +149,26 @@ export async function renderDashboard(app: HTMLElement): Promise<void> {
     btn.addEventListener('click', () => {
       const slug = (btn as HTMLElement).dataset.slug;
       if (slug) router.navigate(`/menu/${slug}`);
+    });
+  });
+
+  // Delete restaurant buttons
+  document.querySelectorAll('.delete-restaurant-btn').forEach(btn => {
+    btn.addEventListener('click', async () => {
+      const id = (btn as HTMLElement).dataset.id;
+      const name = (btn as HTMLElement).dataset.name;
+      if (!id) return;
+
+      const confirmed = confirm(`"${name}" restoranını silmek istediğinize emin misiniz?\n\nBu işlem geri alınamaz. Tüm menü, kategoriler ve ürünler silinecektir.`);
+      if (!confirmed) return;
+
+      try {
+        await localDB.deleteRestaurant(id);
+        showToast(`"${name}" silindi`, 'success');
+        renderDashboard(app);
+      } catch (err: any) {
+        showToast('Silme hatası: ' + err.message, 'error');
+      }
     });
   });
 }

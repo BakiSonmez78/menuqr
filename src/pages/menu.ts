@@ -220,7 +220,7 @@ function renderMenuPage(
   themeColor: string
 ): void {
   const langs = restaurant.languages && restaurant.languages.length > 1 ? restaurant.languages : null;
-  const hasOrdering = restaurant.enableOrdering;
+  const hasOrdering = restaurant.enableOrdering !== false;
   const hasWaiterCall = restaurant.enableWaiterCall;
   const popularItems = availableItems.filter(i => i.isPopular);
 
