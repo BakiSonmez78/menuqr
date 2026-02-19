@@ -120,12 +120,16 @@ export async function renderMenu(app: HTMLElement, slug: string): Promise<void> 
 // ============================================
 // Build per-item feedback data for AI assistant
 // ============================================
-function buildItemFeedbackData(restaurantId: string, items: MenuItem[]): ItemFeedbackData[] {
-  // Read feedbacks and orders from localStorage
-  const feedbacks = JSON.parse(localStorage.getItem('menuqr_feedbacks') || '[]')
-    .filter((f: any) => f.restaurantId === restaurantId);
-  const orders = JSON.parse(localStorage.getItem('mqr_orders') || '[]')
-    .filter((o: any) => o.restaurantId === restaurantId);
+async function buildItemFeedbackData(restaurantId: string, items: MenuItem[]): Promise<ItemFeedbackData[]> {
+  // Read feedbacks and orders from Firestore
+  let feedbacks: any[] = [];
+  let orders: any[] = [];
+  try {
+    feedbacks = await localDB.getFeedbacks(restaurantId);
+    orders = await localDB.getOrders(restaurantId);
+  } catch {
+    return [];
+  }
 
   if (feedbacks.length === 0) return [];
 
@@ -160,7 +164,6 @@ function buildItemFeedbackData(restaurantId: string, items: MenuItem[]): ItemFee
     const age = now - (order.createdAt || 0);
     if (order.items) {
       for (const oi of order.items) {
-        // Match by name since order items may not have itemId
         const matchedItem = items.find(i => i.name === oi.name);
         if (matchedItem && itemStats[matchedItem.id]) {
           if (age <= oneWeek) itemStats[matchedItem.id].weekOrders += oi.quantity || 1;
@@ -176,7 +179,6 @@ function buildItemFeedbackData(restaurantId: string, items: MenuItem[]): ItemFee
     if (!order || !order.items) continue;
 
     for (const fb of fbs) {
-      // Apply the rating to each item in the order
       for (const oi of order.items) {
         const matchedItem = items.find(i => i.name === oi.name);
         if (matchedItem && itemStats[matchedItem.id]) {
@@ -523,8 +525,14 @@ function renderMenuPage(
   // ============================================
   // AI Chat Assistant (with feedback awareness)
   // ============================================
-  const feedbackData = buildItemFeedbackData(restaurant.id, availableItems);
-  const assistant = new MenuAssistant(availableItems, categories, restaurant, feedbackData);
+  let assistant = new MenuAssistant(availableItems, categories, restaurant);
+  // Load feedback data async and update assistant
+  (async () => {
+    try {
+      const feedbackData = await buildItemFeedbackData(restaurant.id, availableItems);
+      assistant.setFeedbackData(feedbackData);
+    } catch { /* feedback data is optional */ }
+  })();
   const chatDrawer = document.getElementById('ai-chat-drawer');
   const chatMessages = document.getElementById('ai-chat-messages');
   const chatInput = document.getElementById('ai-chat-input') as HTMLInputElement;
