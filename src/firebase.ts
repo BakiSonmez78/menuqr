@@ -15,7 +15,6 @@ import {
     deleteDoc,
     query,
     where,
-    orderBy,
     writeBatch,
 } from 'firebase/firestore';
 import type { Firestore } from 'firebase/firestore';
@@ -342,11 +341,12 @@ class FirestoreDB {
     async getCategories(restaurantId: string): Promise<MenuCategory[]> {
         const q = query(
             collection(this.firestore, 'categories'),
-            where('restaurantId', '==', restaurantId),
-            orderBy('order')
+            where('restaurantId', '==', restaurantId)
         );
         const snapshot = await getDocs(q);
-        return snapshot.docs.map(d => ({ ...d.data(), id: d.id } as MenuCategory));
+        return snapshot.docs
+            .map(d => ({ ...d.data(), id: d.id } as MenuCategory))
+            .sort((a, b) => (a.order || 0) - (b.order || 0));
     }
 
     async saveCategory(category: Omit<MenuCategory, 'id'>): Promise<MenuCategory> {
@@ -374,21 +374,23 @@ class FirestoreDB {
     async getItems(restaurantId: string): Promise<MenuItem[]> {
         const q = query(
             collection(this.firestore, 'items'),
-            where('restaurantId', '==', restaurantId),
-            orderBy('order')
+            where('restaurantId', '==', restaurantId)
         );
         const snapshot = await getDocs(q);
-        return snapshot.docs.map(d => ({ ...d.data(), id: d.id } as MenuItem));
+        return snapshot.docs
+            .map(d => ({ ...d.data(), id: d.id } as MenuItem))
+            .sort((a, b) => (a.order || 0) - (b.order || 0));
     }
 
     async getItemsByCategory(categoryId: string): Promise<MenuItem[]> {
         const q = query(
             collection(this.firestore, 'items'),
-            where('categoryId', '==', categoryId),
-            orderBy('order')
+            where('categoryId', '==', categoryId)
         );
         const snapshot = await getDocs(q);
-        return snapshot.docs.map(d => ({ ...d.data(), id: d.id } as MenuItem));
+        return snapshot.docs
+            .map(d => ({ ...d.data(), id: d.id } as MenuItem))
+            .sort((a, b) => (a.order || 0) - (b.order || 0));
     }
 
     async saveItem(item: Omit<MenuItem, 'id'>): Promise<MenuItem> {
@@ -410,11 +412,12 @@ class FirestoreDB {
     async getOrders(restaurantId: string): Promise<Order[]> {
         const q = query(
             collection(this.firestore, 'orders'),
-            where('restaurantId', '==', restaurantId),
-            orderBy('createdAt', 'desc')
+            where('restaurantId', '==', restaurantId)
         );
         const snapshot = await getDocs(q);
-        return snapshot.docs.map(d => ({ ...d.data(), id: d.id } as Order));
+        return snapshot.docs
+            .map(d => ({ ...d.data(), id: d.id } as Order))
+            .sort((a, b) => (b.createdAt || 0) - (a.createdAt || 0));
     }
 
     async saveOrder(order: Omit<Order, 'id' | 'createdAt'>): Promise<Order> {
@@ -432,11 +435,12 @@ class FirestoreDB {
     async getTables(restaurantId: string): Promise<Table[]> {
         const q = query(
             collection(this.firestore, 'tables'),
-            where('restaurantId', '==', restaurantId),
-            orderBy('number')
+            where('restaurantId', '==', restaurantId)
         );
         const snapshot = await getDocs(q);
-        return snapshot.docs.map(d => ({ ...d.data(), id: d.id } as Table));
+        return snapshot.docs
+            .map(d => ({ ...d.data(), id: d.id } as Table))
+            .sort((a, b) => (a.number || 0) - (b.number || 0));
     }
 
     async setupTables(restaurantId: string, count: number): Promise<void> {
@@ -488,11 +492,12 @@ class FirestoreDB {
     async getFeedbacks(restaurantId: string): Promise<Feedback[]> {
         const q = query(
             collection(this.firestore, 'feedbacks'),
-            where('restaurantId', '==', restaurantId),
-            orderBy('createdAt', 'desc')
+            where('restaurantId', '==', restaurantId)
         );
         const snapshot = await getDocs(q);
-        return snapshot.docs.map(d => ({ ...d.data(), id: d.id } as Feedback));
+        return snapshot.docs
+            .map(d => ({ ...d.data(), id: d.id } as Feedback))
+            .sort((a, b) => (b.createdAt || 0) - (a.createdAt || 0));
     }
 
     async getFeedbackStats(restaurantId: string): Promise<{ avg: number; count: number; distribution: number[] }> {
