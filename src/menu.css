@@ -800,22 +800,23 @@
     background: rgba(0, 0, 0, 0.7);
     z-index: 200;
     display: flex;
-    align-items: flex-end;
+    align-items: center;
     justify-content: center;
     backdrop-filter: blur(4px);
+    padding: 1rem;
+    overflow-y: auto;
 }
 
 .menu-detail-modal {
     width: 100%;
     max-width: 500px;
-    max-height: 85vh;
+    max-height: 90vh;
     background: var(--surface-card);
-    border-radius: var(--radius-2xl) var(--radius-2xl) 0 0;
+    border-radius: var(--radius-2xl);
     overflow-y: auto;
     animation: drawer-up 0.3s ease;
     position: relative;
     border: 1px solid var(--surface-glass-border);
-    border-bottom: none;
 }
 
 .menu-detail-close {
@@ -866,6 +867,7 @@
 
 .menu-detail-body {
     padding: var(--space-lg);
+    padding-bottom: var(--space-2xl);
 }
 
 .menu-detail-name {
